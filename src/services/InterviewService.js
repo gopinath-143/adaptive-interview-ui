@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const BASE_URL =
-  "http://localhost:8080/api/interview";
+  "https://adaptive-interview-backend.onrender.com/api/interview";
 
 export const startInterview =
   async (formData) => {
@@ -39,6 +39,6 @@ export const getInterviewStatus =
     async (sessionId) => {
 
         return axios.get(
-            `http://localhost:8080/api/interview/status/${sessionId}`
+            `${BASE_URL}/status/${sessionId}`
         );
     };

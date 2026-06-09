@@ -21,7 +21,7 @@ function LoginPage() {
 
                 const response =
                     await axios.post(
-                        "http://localhost:8080/api/auth/login",
+                        "https://adaptive-interview-backend.onrender.com/api/auth/login",
                         {
                             username: username,
                             password: password
