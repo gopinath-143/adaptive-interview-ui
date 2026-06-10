@@ -74,15 +74,48 @@ function ManagerDashboard() {
         navigate("/");
     };
 
-    const filteredResults =
-        results.filter(
-            (result) =>
-                result.candidateName
-                    ?.toLowerCase()
-                    .includes(
-                        searchTerm.toLowerCase()
-                    )
+    // Remove duplicate candidate names
+
+    const uniqueResults =
+        Array.from(
+
+            new Map(
+
+                results.map(
+                    result => [
+
+                        result.candidateName
+                            ?.trim()
+                            .toLowerCase(),
+
+                        result
+                    ]
+                )
+
+            ).values()
+
         );
+
+    // Search candidate
+
+    const filteredResults =
+
+        searchTerm.trim() === ""
+
+            ? uniqueResults
+
+            : uniqueResults.filter(
+                (result) =>
+
+                    result.candidateName
+                        ?.trim()
+                        .toLowerCase()
+                        .includes(
+                            searchTerm
+                                .trim()
+                                .toLowerCase()
+                        )
+            );
 
     return (
 
@@ -132,11 +165,17 @@ function ManagerDashboard() {
 
                         <h6 className="mt-2">
 
-                            Total Candidates :
+                            Showing :
+
                             {" "}
+
                             {
                                 filteredResults.length
                             }
+
+                            {" "}
+
+                            Candidate(s)
 
                         </h6>
 
@@ -177,7 +216,9 @@ function ManagerDashboard() {
                     <tbody>
 
                         {
-                            filteredResults.length > 0 ?
+                            filteredResults.length > 0
+
+                                ?
 
                                 filteredResults.map(
                                     (result) => (
