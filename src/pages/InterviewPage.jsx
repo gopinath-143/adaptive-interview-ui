@@ -19,7 +19,9 @@ function InterviewPage() {
 
         if (!answer.trim()) {
 
-            alert("Please enter your answer");
+            alert(
+                "Please enter your answer"
+            );
 
             return;
         }
@@ -29,7 +31,9 @@ function InterviewPage() {
         try {
 
             const sessionId =
-                localStorage.getItem("sessionId");
+                localStorage.getItem(
+                    "sessionId"
+                );
 
             const response =
                 await submitAnswer({
@@ -37,9 +41,13 @@ function InterviewPage() {
                     answer
                 });
 
-            if (response.data.completed) {
+            if (
+                response.data.completed
+            ) {
 
-                navigate("/completed");
+                navigate(
+                    "/completed"
+                );
 
             } else {
 
@@ -61,6 +69,59 @@ function InterviewPage() {
 
             alert(
                 "Failed to submit answer"
+            );
+
+        } finally {
+
+            setLoading(false);
+        }
+    };
+
+    const handleSkip = async () => {
+
+        setLoading(true);
+
+        try {
+
+            const sessionId =
+                localStorage.getItem(
+                    "sessionId"
+                );
+
+            const response =
+                await submitAnswer({
+                    sessionId,
+                    answer: ""
+                });
+
+            if (
+                response.data.completed
+            ) {
+
+                navigate(
+                    "/completed"
+                );
+
+            } else {
+
+                setQuestion(
+                    response.data.nextQuestion
+                );
+
+                localStorage.setItem(
+                    "currentQuestion",
+                    response.data.nextQuestion
+                );
+
+                setAnswer("");
+            }
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                "Failed to skip question"
             );
 
         } finally {
@@ -98,19 +159,33 @@ function InterviewPage() {
                     placeholder="Enter your answer here..."
                 />
 
-                <button
-                    className="btn btn-success mt-3"
-                    onClick={handleSubmit}
-                    disabled={loading}
-                >
+                <div className="mt-3">
 
-                    {
-                        loading
-                            ? "Please Wait..."
-                            : "Submit Answer"
-                    }
+                    <button
+                        className="btn btn-success me-2"
+                        onClick={handleSubmit}
+                        disabled={loading}
+                    >
 
-                </button>
+                        {
+                            loading
+                                ? "Please Wait..."
+                                : "Submit Answer"
+                        }
+
+                    </button>
+
+                    <button
+                        className="btn btn-warning"
+                        onClick={handleSkip}
+                        disabled={loading}
+                    >
+
+                        Skip Question
+
+                    </button>
+
+                </div>
 
             </div>
 
