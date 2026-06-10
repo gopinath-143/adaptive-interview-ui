@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import LoadingScreen from "../components/LoadingScreen";
 
 function LoginPage() {
 
@@ -12,10 +13,15 @@ function LoginPage() {
     const [password, setPassword] =
         useState("");
 
+    const [loading, setLoading] =
+        useState(false);
+
     const handleLogin =
         async (e) => {
 
             e.preventDefault();
+
+            setLoading(true);
 
             try {
 
@@ -68,12 +74,23 @@ function LoginPage() {
                 alert(
                     "Invalid Username or Password"
                 );
+
+            } finally {
+
+                setLoading(false);
             }
         };
 
     return (
 
         <div className="container mt-5">
+
+            {
+                loading &&
+                <LoadingScreen
+                    message="Logging In..."
+                />
+            }
 
             <div className="card p-4">
 
@@ -109,9 +126,15 @@ function LoginPage() {
 
                     <button
                         type="submit"
-                        className="btn btn-primary w-100">
+                        className="btn btn-primary w-100"
+                        disabled={loading}
+                    >
 
-                        Login
+                        {
+                            loading
+                                ? "Please Wait..."
+                                : "Login"
+                        }
 
                     </button>
 

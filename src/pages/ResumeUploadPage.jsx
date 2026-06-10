@@ -4,123 +4,148 @@ import { useNavigate } from "react-router-dom";
 import { startInterview }
 from "../services/InterviewService";
 
+import LoadingScreen
+from "../components/LoadingScreen";
+
 function ResumeUploadPage() {
 
+    const navigate =
+        useNavigate();
 
-const navigate =
-    useNavigate();
+    const [name, setName] =
+        useState("");
 
-const [name, setName] =
-    useState("");
+    const [email, setEmail] =
+        useState("");
 
-const [email, setEmail] =
-    useState("");
+    const [resume, setResume] =
+        useState(null);
 
-const [resume, setResume] =
-    useState(null);
+    const [loading, setLoading] =
+        useState(false);
 
-const handleSubmit =
-    async (e) => {
+    const handleSubmit =
+        async (e) => {
 
-        e.preventDefault();
+            e.preventDefault();
 
-        try {
+            setLoading(true);
 
-            const formData =
-                new FormData();
+            try {
 
-            formData.append(
-                "name",
-                name);
+                const formData =
+                    new FormData();
 
-            formData.append(
-                "email",
-                email);
+                formData.append(
+                    "name",
+                    name);
 
-            formData.append(
-                "resume",
-                resume);
+                formData.append(
+                    "email",
+                    email);
 
-            const response =
-                await startInterview(
-                    formData);
+                formData.append(
+                    "resume",
+                    resume);
 
-            localStorage.setItem(
-                "sessionId",
-                response.data.sessionId
-            );
+                const response =
+                    await startInterview(
+                        formData);
 
-            localStorage.setItem(
-                "currentQuestion",
-                response.data.question
-            );
+                localStorage.setItem(
+                    "sessionId",
+                    response.data.sessionId
+                );
 
-            navigate("/interview");
+                localStorage.setItem(
+                    "currentQuestion",
+                    response.data.question
+                );
 
-        } catch (error) {
+                navigate(
+                    "/interview"
+                );
 
-            console.error(error);
+            } catch (error) {
 
-            alert(
-                "Failed to start interview"
-            );
-        }
-    };
+                console.error(error);
 
-return (
+                alert(
+                    "Failed to start interview"
+                );
 
-    <div className="container mt-5">
+            } finally {
 
-        <div className="card p-4">
+                setLoading(false);
+            }
+        };
 
-            <h2>
-                AI Interview Platform
-            </h2>
+    return (
 
-            <form
-                onSubmit={handleSubmit}>
+        <div className="container mt-5">
 
-                <input
-                    className="form-control mb-3"
-                    placeholder="Name"
-                    value={name}
-                    onChange={(e) =>
-                        setName(
-                            e.target.value)}
+            {
+                loading &&
+                <LoadingScreen
+                    message="Analyzing Resume and Generating Interview Questions..."
                 />
+            }
 
-                <input
-                    className="form-control mb-3"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) =>
-                        setEmail(
-                            e.target.value)}
-                />
+            <div className="card p-4">
 
-                <input
-                    type="file"
-                    className="form-control mb-3"
-                    onChange={(e) =>
-                        setResume(
-                            e.target.files[0])}
-                />
+                <h2>
+                    AI Interview Platform
+                </h2>
 
-                <button
-                    className="btn btn-primary">
+                <form
+                    onSubmit={handleSubmit}>
 
-                    Start Interview
+                    <input
+                        className="form-control mb-3"
+                        placeholder="Name"
+                        value={name}
+                        onChange={(e) =>
+                            setName(
+                                e.target.value)}
+                    />
 
-                </button>
+                    <input
+                        className="form-control mb-3"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) =>
+                            setEmail(
+                                e.target.value)}
+                    />
 
-            </form>
+                    <input
+                        type="file"
+                        className="form-control mb-3"
+                        onChange={(e) =>
+                            setResume(
+                                e.target.files[0])}
+                    />
+
+                    <button
+                        type="submit"
+                        className="btn btn-primary"
+                        disabled={loading}
+                    >
+
+                        {
+                            loading
+                                ? "Please Wait..."
+                                : "Start Interview"
+                        }
+
+                    </button>
+
+                </form>
+
+            </div>
 
         </div>
-
-    </div>
-);
-
-
+    );
 }
 
 export default ResumeUploadPage;

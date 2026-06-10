@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { submitAnswer } from "../services/InterviewService";
+import LoadingScreen from "../components/LoadingScreen";
 
 function InterviewPage() {
 
@@ -12,7 +13,18 @@ function InterviewPage() {
         localStorage.getItem("currentQuestion") || ""
     );
 
+    const [loading, setLoading] = useState(false);
+
     const handleSubmit = async () => {
+
+        if (!answer.trim()) {
+
+            alert("Please enter your answer");
+
+            return;
+        }
+
+        setLoading(true);
 
         try {
 
@@ -47,31 +59,57 @@ function InterviewPage() {
 
             console.error(error);
 
-            alert("Failed to submit answer");
+            alert(
+                "Failed to submit answer"
+            );
+
+        } finally {
+
+            setLoading(false);
         }
     };
 
     return (
+
         <div className="container mt-5">
+
+            {
+                loading &&
+                <LoadingScreen
+                    message="Evaluating Answer and Generating Next Question..."
+                />
+            }
 
             <div className="card p-4">
 
-                <h4>{question}</h4>
+                <h4 className="mb-4">
+                    {question}
+                </h4>
 
                 <textarea
                     className="form-control mt-3"
                     rows="5"
                     value={answer}
                     onChange={(e) =>
-                        setAnswer(e.target.value)
+                        setAnswer(
+                            e.target.value
+                        )
                     }
+                    placeholder="Enter your answer here..."
                 />
 
                 <button
                     className="btn btn-success mt-3"
                     onClick={handleSubmit}
+                    disabled={loading}
                 >
-                    Submit Answer
+
+                    {
+                        loading
+                            ? "Please Wait..."
+                            : "Submit Answer"
+                    }
+
                 </button>
 
             </div>
