@@ -1,196 +1,151 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-import { getResults }
-from "../services/InterviewService";
+import LoadingScreen
+from "../components/LoadingScreen";
 
-function ManagerDashboard() {
+import AppHeader
+from "../components/AppHeader";
 
-    const navigate =
-        useNavigate();
+function LoginPage() {
 
-    const [results,
-        setResults] =
-        useState([]);
+    const navigate = useNavigate();
 
-    useEffect(() => {
+    const [username, setUsername] =
+        useState("");
 
-        const token =
-            localStorage.getItem(
-                "token"
-            );
+    const [password, setPassword] =
+        useState("");
 
-        if (!token) {
+    const [loading, setLoading] =
+        useState(false);
 
-            alert(
-                "Please Login First"
-            );
+    const handleLogin =
+        async (e) => {
 
-            navigate("/");
+            e.preventDefault();
 
-            return;
-        }
-
-        loadResults();
-
-    }, []);
-
-    const loadResults =
-        async () => {
+            setLoading(true);
 
             try {
 
                 const response =
-                    await getResults();
+                    await axios.post(
+                        "https://adaptive-interview-backend.onrender.com/api/auth/login",
+                        {
+                            username: username,
+                            password: password
+                        }
+                    );
 
-                setResults(
-                    response.data
+                localStorage.setItem(
+                    "token",
+                    response.data.token
                 );
+
+                localStorage.setItem(
+                    "role",
+                    response.data.role
+                );
+
+                if (
+                    response.data.role === "ADMIN"
+                ) {
+
+                    navigate(
+                        "/manager-dashboard"
+                    );
+
+                } else if (
+                    response.data.role === "MANAGER"
+                ) {
+
+                    navigate(
+                        "/manager-dashboard"
+                    );
+
+                } else {
+
+                    navigate(
+                        "/upload"
+                    );
+                }
 
             } catch (error) {
 
-                console.error(
-                    error
-                );
+                console.error(error);
 
                 alert(
-                    "Unable to load interview results"
+                    "Invalid Username or Password"
                 );
+
+            } finally {
+
+                setLoading(false);
             }
         };
-
-    const logout = () => {
-
-        localStorage.clear();
-
-        alert(
-            "Logged Out Successfully"
-        );
-
-        navigate("/");
-    };
 
     return (
 
         <div className="container mt-5">
 
-            <div className="d-flex justify-content-between align-items-center mb-4">
+            {
+                loading &&
+                <LoadingScreen
+                    message="Logging In..."
+                />
+            }
 
-                <h2>
-                    Manager Dashboard
-                </h2>
-
-                <button
-                    className="btn btn-danger"
-                    onClick={logout}>
-
-                    Logout
-
-                </button>
-
-            </div>
+            <AppHeader />
 
             <div className="card p-4">
 
-                <h4 className="mb-3">
-                    Interview Results
-                </h4>
+                <h3 className="mb-4 text-center">
+                    Login
+                </h3>
 
-                <table className="table table-bordered table-striped">
+                <form onSubmit={handleLogin}>
 
-                    <thead className="table-dark">
+                    <input
+                        type="text"
+                        className="form-control mb-3"
+                        placeholder="Username"
+                        value={username}
+                        onChange={(e) =>
+                            setUsername(
+                                e.target.value
+                            )
+                        }
+                    />
 
-                        <tr>
+                    <input
+                        type="password"
+                        className="form-control mb-3"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) =>
+                            setPassword(
+                                e.target.value
+                            )
+                        }
+                    />
 
-                            <th>
-                                Session ID
-                            </th>
-
-                            <th>
-                                Candidate Name
-                            </th>
-
-                            <th>
-                                Skill
-                            </th>
-
-                            <th>
-                                Final Score
-                            </th>
-
-                            <th>
-                                Summary
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
+                    <button
+                        type="submit"
+                        className="btn btn-primary w-100"
+                        disabled={loading}
+                    >
 
                         {
-                            results.length > 0 ?
-
-                                results.map(
-                                    (result) => (
-
-                                        <tr
-                                            key={
-                                                result.sessionId
-                                            }>
-
-                                            <td>
-                                                {
-                                                    result.sessionId
-                                                }
-                                            </td>
-
-                                            <td>
-                                                {
-                                                    result.candidateName
-                                                }
-                                            </td>
-
-                                            <td>
-                                                {
-                                                    result.skill
-                                                }
-                                            </td>
-
-                                            <td>
-                                                {
-                                                    result.finalScore
-                                                }
-                                            </td>
-
-                                            <td>
-                                                {
-                                                    result.summary
-                                                }
-                                            </td>
-
-                                        </tr>
-                                    )
-                                )
-
-                                :
-
-                                <tr>
-
-                                    <td
-                                        colSpan="5"
-                                        className="text-center">
-
-                                        No Interview Results Found
-
-                                    </td>
-
-                                </tr>
+                            loading
+                                ? "Please Wait..."
+                                : "Login"
                         }
 
-                    </tbody>
+                    </button>
 
-                </table>
+                </form>
 
             </div>
 
@@ -198,4 +153,4 @@ function ManagerDashboard() {
     );
 }
 
-export default ManagerDashboard;
+export default LoginPage;

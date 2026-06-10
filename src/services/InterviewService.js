@@ -1,39 +1,39 @@
 import axios from "axios";
 
 const BASE_URL =
-  "https://adaptive-interview-backend.onrender.com/api/interview";
+    "https://adaptive-interview-backend.onrender.com/api/interview";
 
 export const startInterview =
-  async (formData) => {
+    async (formData) => {
 
-    return axios.post(
-      `${BASE_URL}/start`,
-      formData,
-      {
-        headers: {
-          "Content-Type":
-            "multipart/form-data"
-        }
-      }
-    );
-};
+        return axios.post(
+            `${BASE_URL}/start`,
+            formData,
+            {
+                headers: {
+                    "Content-Type":
+                        "multipart/form-data"
+                }
+            }
+        );
+    };
 
 export const submitAnswer =
-  async (payload) => {
+    async (payload) => {
 
-    return axios.post(
-      `${BASE_URL}/answer`,
-      payload
-    );
-};
+        return axios.post(
+            `${BASE_URL}/answer`,
+            payload
+        );
+    };
 
 export const getResults =
-  async () => {
+    async () => {
 
-    return axios.get(
-      `${BASE_URL}/results`
-    );
-};
+        return axios.get(
+            `${BASE_URL}/results`
+        );
+    };
 
 export const getInterviewStatus =
     async (sessionId) => {

@@ -7,6 +7,9 @@ from "../services/InterviewService";
 import LoadingScreen
 from "../components/LoadingScreen";
 
+import AppHeader
+from "../components/AppHeader";
+
 function ResumeUploadPage() {
 
     const navigate =
@@ -91,18 +94,20 @@ function ResumeUploadPage() {
                 />
             }
 
+            <AppHeader />
+
             <div className="card p-4">
 
-                <h2>
-                    AI Interview Platform
-                </h2>
+                <h4 className="mb-4 text-center">
+                    Candidate Registration
+                </h4>
 
                 <form
                     onSubmit={handleSubmit}>
 
                     <input
                         className="form-control mb-3"
-                        placeholder="Name"
+                        placeholder="Enter Your Name"
                         value={name}
                         onChange={(e) =>
                             setName(
@@ -111,7 +116,7 @@ function ResumeUploadPage() {
 
                     <input
                         className="form-control mb-3"
-                        placeholder="Email"
+                        placeholder="Enter Your Email"
                         value={email}
                         onChange={(e) =>
                             setEmail(
@@ -128,7 +133,7 @@ function ResumeUploadPage() {
 
                     <button
                         type="submit"
-                        className="btn btn-primary"
+                        className="btn btn-primary w-100"
                         disabled={loading}
                     >
 

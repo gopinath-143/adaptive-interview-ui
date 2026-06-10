@@ -1,196 +1,289 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { submitAnswer } from "../services/InterviewService";
-import LoadingScreen from "../components/LoadingScreen";
+import {
+    useState,
+    useEffect
+} from "react";
+
+import { useNavigate }
+from "react-router-dom";
+
+import {
+    submitAnswer,
+    getInterviewStatus
+}
+from "../services/InterviewService";
+
+import LoadingScreen
+from "../components/LoadingScreen";
+
+import AppHeader
+from "../components/AppHeader";
 
 function InterviewPage() {
 
-    const navigate = useNavigate();
+    const navigate =
+        useNavigate();
 
-    const [answer, setAnswer] = useState("");
+    const [answer, setAnswer] =
+        useState("");
 
-    const [question, setQuestion] = useState(
-        localStorage.getItem("currentQuestion") || ""
-    );
+    const [question, setQuestion] =
+        useState(
+            localStorage.getItem(
+                "currentQuestion"
+            ) || ""
+        );
 
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] =
+        useState(false);
 
-    const handleSubmit = async () => {
+    const [currentQuestionNumber,
+           setCurrentQuestionNumber] =
+           useState(1);
 
-        if (!answer.trim()) {
+    const [totalQuestions,
+           setTotalQuestions] =
+           useState(0);
 
-            alert(
-                "Please enter your answer"
-            );
+    useEffect(() => {
 
-            return;
-        }
+        loadInterviewStatus();
 
-        setLoading(true);
+    }, []);
 
-        try {
+    const loadInterviewStatus =
+        async () => {
 
-            const sessionId =
-                localStorage.getItem(
-                    "sessionId"
+            try {
+
+                const sessionId =
+                    localStorage.getItem(
+                        "sessionId"
+                    );
+
+                const response =
+                    await getInterviewStatus(
+                        sessionId
+                    );
+
+                setCurrentQuestionNumber(
+                    response.data.currentQuestion
                 );
 
-            const response =
-                await submitAnswer({
-                    sessionId,
-                    answer
-                });
-
-            if (
-                response.data.completed
-            ) {
-
-                navigate(
-                    "/completed"
+                setTotalQuestions(
+                    response.data.totalQuestions
                 );
 
-            } else {
+            } catch (error) {
 
-                setQuestion(
-                    response.data.nextQuestion
+                console.error(error);
+            }
+        };
+
+    const handleSubmit =
+        async () => {
+
+            if (!answer.trim()) {
+
+                alert(
+                    "Please enter your answer"
                 );
 
-                localStorage.setItem(
-                    "currentQuestion",
-                    response.data.nextQuestion
-                );
-
-                setAnswer("");
+                return;
             }
 
-        } catch (error) {
+            setLoading(true);
 
-            console.error(error);
+            try {
 
-            alert(
-                "Failed to submit answer"
-            );
+                const sessionId =
+                    localStorage.getItem(
+                        "sessionId"
+                    );
 
-        } finally {
+                const response =
+                    await submitAnswer({
+                        sessionId,
+                        answer
+                    });
 
-            setLoading(false);
-        }
-    };
+                if (
+                    response.data.completed
+                ) {
 
-    const handleSkip = async () => {
+                    navigate(
+                        "/completed"
+                    );
 
-        setLoading(true);
+                } else {
 
-        try {
+                    setQuestion(
+                        response.data.nextQuestion
+                    );
 
-            const sessionId =
-                localStorage.getItem(
-                    "sessionId"
+                    localStorage.setItem(
+                        "currentQuestion",
+                        response.data.nextQuestion
+                    );
+
+                    setAnswer("");
+
+                    await loadInterviewStatus();
+                }
+
+            } catch (error) {
+
+                console.error(error);
+
+                alert(
+                    "Failed to submit answer"
                 );
 
-            const response =
-                await submitAnswer({
-                    sessionId,
-                    answer: ""
-                });
+            } finally {
 
-            if (
-                response.data.completed
-            ) {
-
-                navigate(
-                    "/completed"
-                );
-
-            } else {
-
-                setQuestion(
-                    response.data.nextQuestion
-                );
-
-                localStorage.setItem(
-                    "currentQuestion",
-                    response.data.nextQuestion
-                );
-
-                setAnswer("");
+                setLoading(false);
             }
+        };
 
-        } catch (error) {
+    const handleSkip =
+        async () => {
 
-            console.error(error);
+            setLoading(true);
 
-            alert(
-                "Failed to skip question"
-            );
+            try {
 
-        } finally {
+                const sessionId =
+                    localStorage.getItem(
+                        "sessionId"
+                    );
 
-            setLoading(false);
-        }
-    };
+                const response =
+                    await submitAnswer({
+                        sessionId,
+                        answer: ""
+                    });
+
+                if (
+                    response.data.completed
+                ) {
+
+                    navigate(
+                        "/completed"
+                    );
+
+                } else {
+
+                    setQuestion(
+                        response.data.nextQuestion
+                    );
+
+                    localStorage.setItem(
+                        "currentQuestion",
+                        response.data.nextQuestion
+                    );
+
+                    setAnswer("");
+
+                    await loadInterviewStatus();
+                }
+
+            } catch (error) {
+
+                console.error(error);
+
+                alert(
+                    "Failed to skip question"
+                );
+
+            } finally {
+
+                setLoading(false);
+            }
+        };
 
     return (
 
-        <div className="container mt-5">
+    <div className="container mt-5">
 
-            {
-                loading &&
-                <LoadingScreen
-                    message="Evaluating Answer and Generating Next Question..."
-                />
-            }
+        {
+            loading &&
+            <LoadingScreen
+                message="Next Question..."
+            />
+        }
 
-            <div className="card p-4">
+        <AppHeader />
 
-                <h4 className="mb-4">
-                    {question}
-                </h4>
+        <div className="card p-4">
 
-                <textarea
-                    className="form-control mt-3"
-                    rows="5"
-                    value={answer}
-                    onChange={(e) =>
-                        setAnswer(
-                            e.target.value
-                        )
+            <div
+                className="alert alert-primary">
+
+                <strong>
+
+                    Question
+
+                    {" "}
+
+                    {currentQuestionNumber}
+
+                    {" / "}
+
+                    {totalQuestions}
+
+                </strong>
+
+            </div>
+
+            <h4 className="mb-4">
+
+                {question}
+
+            </h4>
+
+            <textarea
+                className="form-control mt-3"
+                rows="5"
+                value={answer}
+                onChange={(e) =>
+                    setAnswer(
+                        e.target.value
+                    )
+                }
+                placeholder="Enter your answer here..."
+            />
+
+            <div className="mt-3">
+
+                <button
+                    className="btn btn-success me-2"
+                    onClick={handleSubmit}
+                    disabled={loading}
+                >
+
+                    {
+                        loading
+                            ? "Please Wait..."
+                            : "Submit Answer"
                     }
-                    placeholder="Enter your answer here..."
-                />
 
-                <div className="mt-3">
+                </button>
 
-                    <button
-                        className="btn btn-success me-2"
-                        onClick={handleSubmit}
-                        disabled={loading}
-                    >
+                <button
+                    className="btn btn-warning"
+                    onClick={handleSkip}
+                    disabled={loading}
+                >
 
-                        {
-                            loading
-                                ? "Please Wait..."
-                                : "Submit Answer"
-                        }
+                    Skip Question
 
-                    </button>
-
-                    <button
-                        className="btn btn-warning"
-                        onClick={handleSkip}
-                        disabled={loading}
-                    >
-
-                        Skip Question
-
-                    </button>
-
-                </div>
+                </button>
 
             </div>
 
         </div>
-    );
+
+    </div>
+);
 }
 
 export default InterviewPage;
